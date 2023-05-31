@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Proxy</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-size: 18px;
+        margin-right: 10px;
+      }
+
+      input[type="text"] {
+        padding: 5px;
+        font-size: 18px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      button {
+        padding: 5px 10px;
+        font-size: 18px;
+        background-color: #333;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      ul {
+        margin-top: 20px;
+        padding: 0;
+        list-style-type: none;
+        text-align: center;
+      }
+
+      li {
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      #response {
+        font-size: 18px;
+        margin-top: 20px;
+        text-align: center;
+        display: none;
+      }
+
+      #domain-list li:first-of-type {
+        margin-top: 0;
+      }
+
+      .error {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Proxy Content Filtering</h1>
+    <form id="domain-form">
+      <label for="domain-input">Enter a domain:</label>
+      <input type="text" id="domain-input" name="domain">
+      <button type="submit">Submit</button>
+    </form>
+    <ul id="domain-list"></ul>
+    <div id="response"></div>
+    <script>
+      const form = document.querySelector('#domain-form');
+      const domainList = document.querySelector('#domain-list');
+      const responseDiv = document.querySelector('#response');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const domain = formData.get('domain');
+
+        const response = await fetch('/domain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: domain 
+        });
+
+        const data = await response.text();
+        if (data === 'Error: Domain already in blocklist') {
+          responseDiv.textContent = data;
+          responseDiv.classList.add('error');
+        } else {
+          const item = document.createElement('li');
+          item.textContent = data;
+          domainList.appendChild(item);
+          responseDiv.textContent = '';
+          responseDiv.classList.remove('error');
+        }
+        responseDiv.style.display = 'block';
+        setTimeout(() => {
+          responseDiv.style.display = 'none';
+        }, 5000);
+      });
+    </script>
+  </body>
+</html>
